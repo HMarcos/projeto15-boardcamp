@@ -10,10 +10,20 @@ const { Pool } = pg;
 let db = null;
 
 try {
-    db = new Pool({
-        connectionString: process.env.DATABASE_URL,
-    });
+    
+    const databaseConfig = {
+        connectionString: process.env.DATABASE_URL
+    };
 
+    if (process.env.MODE === "PROD") {
+      databaseConfig.ssl = {
+          rejectUnauthorized: false
+      }  
+    }
+    
+    db = new Pool(databaseConfig);
+
+    
     console.log(info("Connection to postgres database successfully established..."));
 
 } catch (e) {
