@@ -1,6 +1,4 @@
-/*INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee")
-VALUES (1, 5, '2021-06-20', 3, null, 4500, null);*/
-
+import dayjs from "dayjs";
 import db from "../db.js";
 
 export async function selectAllRentals() {
@@ -71,6 +69,97 @@ export async function selectRentalsByGameId(gameId) {
     }
 };
 
+export async function checkCustomerValidity(customerId) {
+    try {
+        const query = `
+            SELECT * FROM customers WHERE id = $1;
+        `;
+        const values = [customerId];
+
+        const result = await db.query(query, values);
+
+        if (result.rows.length > 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+export async function checkGameValidity(gameId) {
+    try {
+        const query = `
+            SELECT * FROM games WHERE id = $1;
+        `;
+        const values = [gameId];
+
+        const result = await db.query(query, values);
+
+        if (result.rows.length > 0) {
+            return {
+                exists: true,
+                game: result.rows[0]
+            };
+        }
+        else {
+            return {
+                exists: false,
+                game: null
+            };
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+export async function checkStockAvailability(game) {
+    try {
+        const query = `
+        SELECT COUNT(rentals.id) as "rentedQuantity"
+        FROM rentals 
+        WHERE rentals."gameId" = $1 AND rentals."returnDate" IS NULL;
+        `;
+        const values = [game.id];
+
+        const result = await db.query(query, values);
+        const rentedQuantity = parseInt(result.rows[0].rentedQuantity);
+
+        if (rentedQuantity >= parseInt(game.stockTotal)) {
+            return false;
+        }
+
+        return true;
+
+    } catch (e) {
+        throw e;
+    }
+};
+
+export async function insertRental(rental, game) {
+    const { customerId, gameId, daysRented } = rental;
+    const { pricePerDay } = game;
+    const rentDate = dayjs().format('YYYY-MM-DD').toString();
+    const originalPrice = parseInt(daysRented) * parseFloat(pricePerDay);
+    const returnDate = null;
+    const delayFee = null;
+
+    try {
+        const query = `
+        INSERT INTO rentals ("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee")
+        VALUES ($1, $2, $3, $4, $5, $6, $7);
+        `;
+
+        const values = [customerId, gameId, rentDate, daysRented, returnDate, originalPrice, delayFee];
+
+        await db.query(query, values);
+
+    } catch (e) {
+        throw e;
+    }
+};
 
 
 function formatRentalResult(result) {

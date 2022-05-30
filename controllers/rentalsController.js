@@ -1,4 +1,4 @@
-import { selectAllRentals, selectRentalsByCustomerId, selectRentalsByGameId } from "../services/rentalsServices.js";
+import { insertRental, selectAllRentals, selectRentalsByCustomerId, selectRentalsByGameId } from "../services/rentalsServices.js";
 
 import { debug, error } from "../logging/logging.js";
 
@@ -28,3 +28,18 @@ export async function getRentals(req, res){
         return res.sendStatus(500);
     }
 };
+
+export async function setRental(req, res) {
+    const rental = req.body;
+    const game = res.locals.game;
+
+    try {
+        await insertRental(rental, game);
+        console.log(debug("Rental inserted successfully...\n"));
+        res.sendStatus(201);
+
+    } catch (e) {
+        console.log(error("Database server internal error...\n"), e);
+        return res.sendStatus(500);
+    }
+}
