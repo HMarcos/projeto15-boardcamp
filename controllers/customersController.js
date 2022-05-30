@@ -1,4 +1,6 @@
-import { insertCustomer, selectAllCustomers, selectCustomersByCpf, selectCustomersById } from "../services/customersService.js";
+import dayjs from "dayjs";
+
+import { insertCustomer, selectAllCustomers, selectCustomersByCpf, selectCustomersById, updateCustomer } from "../services/customersService.js";
 
 import { debug, error } from "../logging/logging.js";
 
@@ -27,7 +29,7 @@ export async function getCustomer(req, res) {
     const customerId = parseInt(req.params.id);
 
     try {
-        const customer = await selectCustomersById(customerId);
+        let customer = await selectCustomersById(customerId);
 
         if (customer === null) {
             console.log(error("Customer not foud..."));
@@ -35,6 +37,11 @@ export async function getCustomer(req, res) {
         }
         else {
             console.log(debug('Customer retrived successfully...\n'));
+            const formatedBirthday = dayjs(customer.birthday).format('YYYY-MM-DD').toString();
+            customer = {
+                ...customer,
+                birthday: formatedBirthday
+            }
             return res.send(customer);
         }
 
@@ -51,6 +58,30 @@ export async function setCustomer(req, res) {
         await insertCustomer(customer);
         console.log(debug("Customer inserted successfully...\n"));
         res.sendStatus(201);
+
+    } catch (e) {
+        console.log(error("Database server internal error...\n"), e);
+        return res.sendStatus(500);
+    }
+};
+
+export async function changeCustomer(req, res) {
+    const customerId = parseInt(req.params.id);
+    const newCustomer = req.body;
+
+    try {
+        const customer = await selectCustomersById(customerId);
+
+        if (customer === null) {
+            console.log(error("Customer not foud..."));
+            return res.status(404).send("Customer not foud");
+        }
+        
+        await updateCustomer(customerId, newCustomer);
+        
+        console.log(debug('Customer updated successfully...\n'));
+        return res.sendStatus(200);
+
 
     } catch (e) {
         console.log(error("Database server internal error...\n"), e);

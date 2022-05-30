@@ -1,5 +1,5 @@
 import customersSchema from "../schemas/customersSchema.js";
-import { checkCustomerAlreadyExists } from "../services/customersService.js";
+import { checkCustomerAlreadyExists, checkCustomerforUpdate } from "../services/customersService.js";
 
 import { error } from "../logging/logging.js";
 
@@ -15,11 +15,21 @@ export async function validateCustomer(req, res, next) {
     }
 
     try {
-        const customerExists = await checkCustomerAlreadyExists(customer.cpf);
+        if (req.method === "POST") {
+            const customerExists = await checkCustomerAlreadyExists(customer.cpf);
 
-        if (customerExists) {
-            console.log(error(`This customer is already registered.`));
-            return res.status(409).send(`This customer is already registered.`);
+            if (customerExists) {
+                console.log(error(`This customer is already registered.`));
+                return res.status(409).send(`This customer is already registered.`);
+            }
+        }
+        else if (req.method === "PUT") {
+            const customerId = req.params.id;
+            const customerAvailableforUpdate = await checkCustomerforUpdate(customer.cpf, customerId);
+            if (!customerAvailableforUpdate) {
+                console.log(error(`This customer is already registered.`));
+                return res.status(409).send(`This customer is already registered.`);
+            }
         }
 
         next();
