@@ -1,4 +1,4 @@
-import { selectAllCustomers, selectCustomersByCpf, selectCustomersById } from "../services/customersService.js";
+import { insertCustomer, selectAllCustomers, selectCustomersByCpf, selectCustomersById } from "../services/customersService.js";
 
 import { debug, error } from "../logging/logging.js";
 
@@ -37,6 +37,20 @@ export async function getCustomer(req, res) {
             console.log(debug('Customer retrived successfully...\n'));
             return res.send(customer);
         }
+
+    } catch (e) {
+        console.log(error("Database server internal error...\n"), e);
+        return res.sendStatus(500);
+    }
+};
+
+export async function setCustomer(req, res) {
+    const customer = req.body;
+
+    try {
+        await insertCustomer(customer);
+        console.log(debug("Customer inserted successfully...\n"));
+        res.sendStatus(201);
 
     } catch (e) {
         console.log(error("Database server internal error...\n"), e);

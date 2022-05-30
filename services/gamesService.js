@@ -93,4 +93,4 @@ export async function insertGame(game){
     }catch (e) {
         throw e;
     }
-}
+};

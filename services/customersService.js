@@ -58,6 +58,43 @@ export async function selectCustomersById(id) {
     }
 };
 
+export async function checkCustomerAlreadyExists(customerCpf) {
+    try {
+        const query = `
+            SELECT * FROM customers WHERE cpf = $1;
+        `;
+        const values = [customerCpf];
+
+        const result = await db.query(query, values);
+
+        if (result.rows.length > 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+export async function insertCustomer(customer){
+    const {name, phone, cpf, birthday } = customer;
+    try {
+        const query = `
+        INSERT INTO customers (name, phone, cpf, birthday)
+        VALUES ($1, $2, $3, $4);
+        `;
+
+        const values = [name, phone, cpf, birthday];
+
+        await db.query(query, values);
+
+    }catch (e) {
+        throw e;
+    }
+};
+
 
 
 
