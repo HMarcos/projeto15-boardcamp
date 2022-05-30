@@ -254,6 +254,21 @@ export async function selectRentalWithDateInfos(rentalId) {
     }
 };
 
+export async function deleteRental(rentalId){
+    try {
+        const query = `
+            DELETE FROM rentals WHERE id = $1;
+        `;
+
+        const values = [rentalId];
+
+        await db.query(query, values);
+        
+    } catch (e) {
+        throw e;
+    }
+}
+
 function formatRentalResult(result) {
     const formatedResult = [];
 
