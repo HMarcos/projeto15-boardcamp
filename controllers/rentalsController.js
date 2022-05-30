@@ -1,10 +1,25 @@
-import { selectAllRentals } from "../services/rentalsServices.js";
+import { selectAllRentals, selectRentalsByCustomerId, selectRentalsByGameId } from "../services/rentalsServices.js";
 
 import { debug, error } from "../logging/logging.js";
 
 export async function getRentals(req, res){
+    const customerId = parseInt(req.query.customerId);
+    const gameId = parseInt(req.query.gameId); 
+
+    let rentals = null;
+    
     try {
-        const rentals = await selectAllRentals();
+
+        if (customerId) {
+            rentals = await selectRentalsByCustomerId(customerId);
+        }
+        else if (gameId) {
+            rentals = await selectRentalsByGameId(gameId);
+        }
+        else {
+            rentals = await selectAllRentals();
+        }
+
         console.log(debug("Rentals retrieved successfully...\n"));
         return res.send(rentals);
 
