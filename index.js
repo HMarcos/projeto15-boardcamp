@@ -5,8 +5,10 @@ import dotenv from "dotenv";
 
 import db from "./db.js";
 import categoriesRouter from "./routers/categoriesRouter.js";
+import gamesRouter from "./routers/gamesRouter.js";
 
 import { info } from "./logging/logging.js";
+
 
 dotenv.config();
 
@@ -16,6 +18,7 @@ app.use(json());
 
 // Routers
 app.use(categoriesRouter);
+app.use(gamesRouter)
 
 const PORT = process.env.PORT || 4000;
 
