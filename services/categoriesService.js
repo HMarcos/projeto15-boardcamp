@@ -16,7 +16,7 @@ export async function selectAllCategories() {
 export async function checkCategoryAlreadyExists(categoryName) {
     try {
         const query = `
-            SELECT * FROM categories WHERE name = $1
+            SELECT * FROM categories WHERE name = $1;
         `;
         const values = [categoryName];
 
@@ -37,7 +37,7 @@ export async function insertCategory(category){
     try {
         const query = `
         INSERT INTO categories (name)
-        VALUES ($1)
+        VALUES ($1);
         `;
         
         const values = [category.name];

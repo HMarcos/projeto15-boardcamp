@@ -18,7 +18,7 @@ export async function setCategory(req, res){
 
     try {
         await insertCategory(category);
-        console.log(debug("Category inserted successfully...\n"), category);
+        console.log(debug("Category inserted successfully...\n"));
         res.sendStatus(201);
         
     } catch (e) {
