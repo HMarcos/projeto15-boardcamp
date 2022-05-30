@@ -161,6 +161,98 @@ export async function insertRental(rental, game) {
     }
 };
 
+export async function checkRentalAlreadyExists(rentalId) {
+    try {
+        const query = `
+            SELECT * FROM rentals WHERE id = $1;
+        `;
+        const values = [rentalId];
+
+        const result = await db.query(query, values);
+
+        if (result.rows.length > 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+export async function checkRentalIsClosed(rentalId) {
+    try {
+        const query = `
+            SELECT * FROM rentals WHERE id = $1 and "returnDate" IS NOT NULL;
+        `;
+        const values = [rentalId];
+
+        const result = await db.query(query, values);
+
+        if (result.rows.length > 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    } catch (e) {
+        throw e;
+    }
+};
+
+export async function updateRental(rentalId) {
+    const returnDate = dayjs();
+    let delayFee = null;
+
+    try {
+        const rental = await selectRentalWithDateInfos(rentalId);
+        const { rentDate, daysRented, pricePerDay } = rental;
+        
+        const expectedReturnDate = dayjs(rentDate).add(parseInt(daysRented), 'day');
+        
+        if (returnDate.isBefore(expectedReturnDate)){
+            delayFee = 0;
+        }
+        else {
+            const daysDifference = returnDate.diff(expectedReturnDate, 'day');
+            delayFee = daysDifference * parseFloat(pricePerDay);
+        }
+
+        const query = `
+            UPDATE rentals
+            SET "returnDate" = $1, "delayFee" = $2
+            WHERE id = $3;
+        `;
+
+        const values = [returnDate.format('YYYY-MM-DD').toString(), delayFee, rentalId];
+
+        await db.query(query, values);
+
+    } catch (e) {
+        throw e;
+    }
+}
+
+export async function selectRentalWithDateInfos(rentalId) {
+    try {
+        const query = `
+        SELECT rentals.*, games."pricePerDay"
+        FROM rentals INNER JOIN games
+        ON rentals."gameId" = games.id
+        WHERE rentals.id = $1;
+        `;
+
+        const values = [rentalId];
+
+        const result = await db.query(query, values);
+
+        return result.rows[0];
+
+    } catch (e) {
+        throw e;
+    }
+};
 
 function formatRentalResult(result) {
     const formatedResult = [];

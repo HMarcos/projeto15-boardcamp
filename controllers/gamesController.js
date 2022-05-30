@@ -14,7 +14,7 @@ export async function getGames(req, res) {
             games = await selectAllGames();
         }
 
-        console.log(debug('Games retrived successfully...'));
+        console.log(debug('Games retrived successfully...\n'));
         return res.send(games);
 
     } catch (e) {

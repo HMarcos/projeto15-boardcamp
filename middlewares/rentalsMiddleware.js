@@ -1,5 +1,5 @@
 import rentalsSchema from "../schemas/rentalsSchema.js";
-import {checkCustomerValidity, checkGameValidity, checkStockAvailability} from "../services/rentalsServices.js";
+import { checkCustomerValidity, checkGameValidity, checkRentalAlreadyExists, checkRentalIsClosed, checkStockAvailability } from "../services/rentalsServices.js";
 
 import { error } from "../logging/logging.js";
 
@@ -45,3 +45,28 @@ export async function validateRental(req, res, next) {
         return res.sendStatus(500);
     }
 };
+
+export async function validateReturnRental(req, res, next) {
+    const rentalId = parseInt(req.params.id);
+
+    try {
+        const rentalExists = await checkRentalAlreadyExists(rentalId);
+
+        if (!rentalExists) {
+            console.log(error("Rental not found..."));
+            return res.status(404).send("Rental not found...");
+        }
+
+        const rentalIsClosed = await checkRentalIsClosed(rentalId);
+
+        if (rentalIsClosed) {
+            console.log(error("Rental is closed..."));
+            return res.status(400).send("Rental is closed...");
+        }
+
+        next();
+    } catch (e) {
+        console.log(error("Database server internal error...\n"), e);
+        return res.sendStatus(500);
+    }
+}
