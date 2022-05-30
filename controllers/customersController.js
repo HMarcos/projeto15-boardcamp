@@ -32,8 +32,8 @@ export async function getCustomer(req, res) {
         let customer = await selectCustomersById(customerId);
 
         if (customer === null) {
-            console.log(error("Customer not foud..."));
-            return res.status(404).send("Customer not foud");
+            console.log(error("Customer not found..."));
+            return res.status(404).send("Customer not found");
         }
         else {
             console.log(debug('Customer retrived successfully...\n'));
@@ -73,8 +73,8 @@ export async function changeCustomer(req, res) {
         const customer = await selectCustomersById(customerId);
 
         if (customer === null) {
-            console.log(error("Customer not foud..."));
-            return res.status(404).send("Customer not foud");
+            console.log(error("Customer not found..."));
+            return res.status(404).send("Customer not found");
         }
         
         await updateCustomer(customerId, newCustomer);
