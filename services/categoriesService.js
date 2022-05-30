@@ -2,11 +2,11 @@ import db from "../db.js";
 
 export async function selectAllCategories() {
     try {
-        const query = await db.query(`
+        const result = await db.query(`
             SELECT * FROM categories; 
         `);
 
-        return query.rows;
+        return result.rows;
 
     } catch (e) {
         throw e;
